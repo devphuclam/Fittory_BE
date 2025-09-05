@@ -1,10 +1,19 @@
 import { loadEnv, defineConfig } from '@medusajs/framework/utils';
+import { Modules, ContainerRegistrationKeys } from '@medusajs/framework/utils';
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd());
 
 module.exports = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
+    // thêm databaseDriverOptions để hỗ trợ SSL khi connect Supabase
+    databaseDriverOptions: {
+      ssl: {
+        // ở dev, nếu gặp lỗi chứng chỉ, rejectUnauthorized: false sẽ giúp connect.
+        // (Không khuyến khích dùng trong production — ở production nên verify cert)
+        rejectUnauthorized: false,
+      },
+    },
     http: {
       storeCors: process.env.STORE_CORS!,
       adminCors: process.env.ADMIN_CORS!,
@@ -24,6 +33,21 @@ module.exports = defineConfig({
       resolve: './src/modules/cms',
       options: {
         apiKey: process.env.CMS_API_KEY,
+      },
+    },
+    {
+      resolve: '@medusajs/medusa/auth',
+      dependencies: [Modules.CACHE, ContainerRegistrationKeys.LOGGER],
+      options: {
+        providers: [
+          {
+            resolve: '@medusajs/medusa/auth-emailpass',
+            id: 'emailpass',
+            options: {
+              // hashConfig nếu bạn muốn tùy chỉnh
+            },
+          },
+        ],
       },
     },
   ],
