@@ -1,5 +1,6 @@
 import { loadEnv, defineConfig } from '@medusajs/framework/utils';
 import { Modules, ContainerRegistrationKeys } from '@medusajs/framework/utils';
+import { channel } from 'diagnostics_channel';
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd());
 
@@ -45,6 +46,21 @@ module.exports = defineConfig({
             id: 'emailpass',
             options: {
               // hashConfig nếu bạn muốn tùy chỉnh
+            },
+          },
+        ],
+      },
+    },
+    {
+      resolve: '@medusajs/medusa/notification',
+      options: {
+        providers: [
+          // ... thêm các provider bạn muốn sử dụng
+          {
+            resolve: '@medusajs/medusa/notification-local',
+            id: 'local',
+            options: {
+              channels: ['email'],
             },
           },
         ],
